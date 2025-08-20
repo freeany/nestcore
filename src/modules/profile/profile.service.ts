@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Not, IsNull } from 'typeorm';
 import { Profile, User } from '../../entities';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
@@ -133,19 +133,19 @@ export class ProfileService {
     const totalProfiles = await this.profileRepository.count();
 
     const profilesWithAvatar = await this.profileRepository.count({
-      where: { avatar: { length: 1 } }, // 有头像的用户
+      where: { avatar: Not(IsNull()) }, // 有头像的用户
     });
 
     const profilesWithPhone = await this.profileRepository.count({
-      where: { phone: { length: 1 } }, // 有手机号的用户
+      where: { phone: Not(IsNull()) }, // 有手机号的用户
     });
 
     const profilesWithRealName = await this.profileRepository.count({
-      where: { realName: { length: 1 } }, // 有真实姓名的用户
+      where: { realName: Not(IsNull()) }, // 有真实姓名的用户
     });
 
     const profilesWithBio = await this.profileRepository.count({
-      where: { bio: { length: 1 } }, // 有个人简介的用户
+      where: { bio: Not(IsNull()) }, // 有个人简介的用户
     });
 
     const genderStats = await this.profileRepository

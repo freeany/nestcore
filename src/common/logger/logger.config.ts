@@ -16,7 +16,7 @@ const logFormat = winston.format.combine(
   winston.format.json(),
   winston.format.printf(
     ({ timestamp, level, message, context, trace, ...meta }) => {
-      const logEntry = {
+      const logEntry: any = {
         timestamp,
         level,
         context: context || 'Application',

@@ -26,7 +26,6 @@
     "strict": false,
     "noImplicitReturns": false,
     "noUncheckedIndexedAccess": false,
-    "suppressImplicitAnyIndexErrors": true,
     "noImplicitThis": false
   }
 }

@@ -19,7 +19,7 @@ export class OperationLogService {
    */
   async create(
     createOperationLogDto: CreateOperationLogDto,
-  ): Promise<OperationLog> {
+  ): Promise<OperationLog | null> {
     try {
       const log = this.operationLogRepository.create(createOperationLogDto);
       return await this.operationLogRepository.save(log);
@@ -109,7 +109,7 @@ export class OperationLogService {
   /**
    * 根据ID查找操作日志
    */
-  async findOne(id: number): Promise<OperationLog> {
+  async findOne(id: number): Promise<OperationLog | null> {
     return this.operationLogRepository.findOne({
       where: { id },
       relations: ['user'],

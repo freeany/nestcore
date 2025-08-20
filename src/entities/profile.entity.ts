@@ -20,6 +20,12 @@ export class Profile {
   @Column({ length: 50, nullable: true })
   lastName: string;
 
+  @Column({ length: 50, nullable: true })
+  realName: string;
+
+  @Column({ length: 20, nullable: true })
+  nickname: string;
+
   @Column({ length: 20, nullable: true })
   phone: string;
 
@@ -43,6 +49,18 @@ export class Profile {
 
   @Column({ length: 100, nullable: true })
   position: string;
+
+  @Column({ length: 255, nullable: true })
+  website: string;
+
+  @Column({ length: 50, nullable: true })
+  wechat: string;
+
+  @Column({ length: 50, nullable: true })
+  qq: string;
+
+  @Column({ length: 50, nullable: true })
+  weibo: string;
 
   @CreateDateColumn()
   createdAt: Date;
