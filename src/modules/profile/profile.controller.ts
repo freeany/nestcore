@@ -142,7 +142,7 @@ export class ProfileController {
 
     // 检查权限：只有管理员、经理或资料所有者可以查看
     if (
-      !user.roles.some(role => ['admin', 'manager'].includes(role)) &&
+      !user.roles.some((role) => ['admin', 'manager'].includes(role)) &&
       profile.user.id !== user.id
     ) {
       throw new ForbiddenException('无权限查看此资料');

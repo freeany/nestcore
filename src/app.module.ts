@@ -4,6 +4,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 
+// 配置常量
+import {
+  DATABASE_DEFAULTS,
+  THROTTLE_DEFAULTS,
+  ConfigKeys,
+} from './config/constants';
+import configuration, { configValidationSchema } from './config/configuration';
+
 // 实体
 import { User, Role, Profile, OperationLog } from './entities';
 
@@ -24,13 +32,15 @@ import { RolesGuard } from './auth/guards/roles.guard';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env.local', '.env'],
+      load: [configuration],
+      validationSchema: configValidationSchema,
     }),
 
     // 限流模块
     ThrottlerModule.forRoot([
       {
-        ttl: 60000, // 1分钟
-        limit: 100, // 每分钟最多100次请求
+        ttl: THROTTLE_DEFAULTS.TTL,
+        limit: THROTTLE_DEFAULTS.LIMIT,
       },
     ]),
 
@@ -39,16 +49,26 @@ import { RolesGuard } from './auth/guards/roles.guard';
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         type: 'mysql',
-        host: configService.get('DB_HOST', 'localhost'),
-        port: configService.get('DB_PORT', 3306),
-        username: configService.get('DB_USERNAME', 'root'),
-        password: configService.get('DB_PASSWORD', ''),
-        database: configService.get('DB_DATABASE', 'user_crud'),
+        host: configService.get(ConfigKeys.DB_HOST, DATABASE_DEFAULTS.HOST),
+        port: configService.get(ConfigKeys.DB_PORT, DATABASE_DEFAULTS.PORT),
+        username: configService.get(
+          ConfigKeys.DB_USERNAME,
+          DATABASE_DEFAULTS.USERNAME,
+        ),
+        password: configService.get(
+          ConfigKeys.DB_PASSWORD,
+          DATABASE_DEFAULTS.PASSWORD,
+        ),
+        database: configService.get(
+          ConfigKeys.DB_DATABASE,
+          DATABASE_DEFAULTS.DATABASE,
+        ),
         entities: [User, Role, Profile, OperationLog],
-        synchronize: configService.get('NODE_ENV') !== 'production',
-        logging: configService.get('NODE_ENV') === 'development',
-        timezone: '+08:00',
-        charset: 'utf8mb4',
+        synchronize: configService.get(ConfigKeys.NODE_ENV) !== 'production',
+        // logging: configService.get(ConfigKeys.NODE_ENV) === 'development',
+        logging: false,
+        timezone: DATABASE_DEFAULTS.TIMEZONE,
+        charset: DATABASE_DEFAULTS.CHARSET,
       }),
       inject: [ConfigService],
     }),

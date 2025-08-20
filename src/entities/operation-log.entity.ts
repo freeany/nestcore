@@ -37,7 +37,7 @@ export class OperationLog {
   @Column({ length: 500, nullable: true })
   userAgent: string; // 用户代理
 
-  @Column({ enum: ['SUCCESS', 'FAILED'], default: 'SUCCESS' })
+  @Column({ type: 'enum', enum: ['SUCCESS', 'FAILED'], default: 'SUCCESS' })
   status: string; // 操作状态
 
   @Column({ type: 'text', nullable: true })

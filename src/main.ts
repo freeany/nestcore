@@ -11,11 +11,11 @@ async function bootstrap() {
   // 全局验证管道
   app.useGlobalPipes(
     new ValidationPipe({
-      transform: true,
-      whitelist: true,
-      forbidNonWhitelisted: true,
+      transform: true, // 自动转换数据类型
+      whitelist: true, // 只保留 DTO 中定义的属性
+      forbidNonWhitelisted: true, // 禁止未定义的属性
       transformOptions: {
-        enableImplicitConversion: true,
+        enableImplicitConversion: true, // 启用隐式类型转换
       },
     }),
   );
@@ -31,7 +31,7 @@ async function bootstrap() {
 
   const port = configService.get('PORT', 3000);
   await app.listen(port);
-  
+
   logger.log(`应用程序运行在: http://localhost:${port}`);
   logger.log(`API文档地址: http://localhost:${port}/api/v1`);
 }

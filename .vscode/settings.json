@@ -1,0 +1,5 @@
+// VS Code settings.json
+{
+  "files.eol": "\n",
+  "git.autocrlf": "input"
+}

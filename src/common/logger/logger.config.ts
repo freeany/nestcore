@@ -15,7 +15,21 @@ const logFormat = winston.format.combine(
   winston.format.errors({ stack: true }),
   winston.format.json(),
   winston.format.printf(
-    ({ timestamp, level, message, context, trace, ...meta }) => {
+    ({
+      timestamp,
+      level,
+      message,
+      context,
+      trace,
+      ...meta
+    }: {
+      timestamp: string;
+      level: string;
+      message: string;
+      context?: string;
+      trace?: string;
+      [key: string]: any;
+    }) => {
       const logEntry: any = {
         timestamp,
         level,
@@ -37,10 +51,22 @@ const logFormat = winston.format.combine(
 const consoleFormat = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
   winston.format.colorize({ all: true }),
-  winston.format.printf(({ timestamp, level, message, context }) => {
-    const ctx = context ? `[${context}]` : '';
-    return `${timestamp} ${level} ${ctx} ${message}`;
-  }),
+  winston.format.printf(
+    ({
+      timestamp,
+      level,
+      message,
+      context,
+    }: {
+      timestamp: string;
+      level: string;
+      message: string;
+      context?: string;
+    }) => {
+      const ctx = context ? `[${String(context)}]` : '';
+      return `${timestamp} ${level} ${ctx} ${message}`;
+    },
+  ),
 );
 
 export const winstonConfig: WinstonModuleOptions = {

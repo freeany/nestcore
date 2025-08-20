@@ -32,7 +32,7 @@ export class Profile {
   @Column({ type: 'date', nullable: true })
   birthday: Date;
 
-  @Column({ enum: ['male', 'female', 'other'], nullable: true })
+  @Column({ type: 'enum', enum: ['male', 'female', 'other'], nullable: true })
   gender: string;
 
   @Column({ length: 200, nullable: true })
