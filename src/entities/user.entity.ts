@@ -29,16 +29,16 @@ export class User {
   @Exclude() // 在序列化时排除密码字段
   password: string;
 
-  @Column({ default: true })
+  @Column({ name: 'is_active', default: true })
   isActive: boolean;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ name: 'last_login_at', type: 'timestamp', nullable: true })
   lastLoginAt: Date;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
   // 一对一关系：用户资料

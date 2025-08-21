@@ -14,13 +14,13 @@ export class Profile {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 50, nullable: true })
+  @Column({ name: 'first_name', length: 50, nullable: true })
   firstName: string;
 
-  @Column({ length: 50, nullable: true })
+  @Column({ name: 'last_name', length: 50, nullable: true })
   lastName: string;
 
-  @Column({ length: 50, nullable: true })
+  @Column({ name: 'real_name', length: 50, nullable: true })
   realName: string;
 
   @Column({ length: 20, nullable: true })
@@ -62,10 +62,10 @@ export class Profile {
   @Column({ length: 50, nullable: true })
   weibo: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
   // 一对一关系：关联用户

@@ -25,25 +25,25 @@ export class OperationLog {
   @Column({ type: 'text', nullable: true })
   description: string; // 操作描述
 
-  @Column({ type: 'json', nullable: true })
+  @Column({ name: 'old_data', type: 'json', nullable: true })
   oldData: any; // 操作前的数据
 
-  @Column({ type: 'json', nullable: true })
+  @Column({ name: 'new_data', type: 'json', nullable: true })
   newData: any; // 操作后的数据
 
-  @Column({ length: 45, nullable: true })
+  @Column({ name: 'ip_address', length: 45, nullable: true })
   ipAddress: string; // IP地址
 
-  @Column({ length: 500, nullable: true })
+  @Column({ name: 'user_agent', length: 500, nullable: true })
   userAgent: string; // 用户代理
 
   @Column({ type: 'enum', enum: ['SUCCESS', 'FAILED'], default: 'SUCCESS' })
   status: string; // 操作状态
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ name: 'error_message', type: 'text', nullable: true })
   errorMessage: string; // 错误信息（如果操作失败）
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
   // 多对一关系：关联用户

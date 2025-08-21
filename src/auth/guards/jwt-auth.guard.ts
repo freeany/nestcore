@@ -34,17 +34,12 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     return super.canActivate(context);
   }
 
-  handleRequest<TUser = any>(
-    err: any,
-    user: any,
-    info: any,
-    context: ExecutionContext,
-    status?: any,
-  ): TUser {
+  handleRequest<TUser = any>(err: any, user: any): TUser {
+    console.log(err, 'err');
+
     if (err || !user) {
       throw err || new UnauthorizedException('访问令牌无效或已过期');
     }
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return user as TUser;
   }
 }
