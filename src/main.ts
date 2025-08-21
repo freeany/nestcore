@@ -29,7 +29,7 @@ async function bootstrap() {
   // 全局前缀
   app.setGlobalPrefix('api/v1');
 
-  const port = configService.get('PORT', 3000);
+  const port: number = configService.get('PORT', 3000);
   await app.listen(port);
 
   logger.log(`应用程序运行在: http://localhost:${port}`);

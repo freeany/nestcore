@@ -49,7 +49,7 @@ export class AuthController {
   /**
    * 获取当前用户信息
    */
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Get('profile')
   getProfile(@CurrentUser() user: CurrentUserInfo) {
     return {
@@ -61,7 +61,6 @@ export class AuthController {
   /**
    * 刷新令牌
    */
-  @UseGuards(JwtAuthGuard)
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   async refreshToken(@CurrentUser('id') userId: number) {
@@ -71,7 +70,6 @@ export class AuthController {
   /**
    * 用户登出（客户端处理，服务端记录日志）
    */
-  @UseGuards(JwtAuthGuard)
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   logout() {
