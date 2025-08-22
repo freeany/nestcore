@@ -54,14 +54,14 @@ export class User {
     eager: false,
   })
   @JoinTable({
-    name: 'user_roles',
+    name: 'user_roles', // 指定中间表的名字，关联用户表和角色表
     joinColumn: {
-      name: 'user_id',
-      referencedColumnName: 'id',
+      name: 'user_id', // 中间表指向user表的外键字段名
+      referencedColumnName: 'id', // 引用user表中的id字段
     },
     inverseJoinColumn: {
-      name: 'role_id',
-      referencedColumnName: 'id',
+      name: 'role_id', //中间表指向role表的外键字段名
+      referencedColumnName: 'id', // 引用role表中的id字段
     },
   })
   roles: Role[];

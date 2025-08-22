@@ -29,10 +29,21 @@ import { RolesGuard } from './auth/guards/roles.guard';
 @Module({
   imports: [
     // 配置模块
+    // 加载流程：
+    /**
+     * 1. 从指定的.env文件中读取环境变量
+     * 2. 通过Joi 验证配置的有效性
+     * 3. configuration.ts 将环境变量转换为结构化配置对象
+     * 4. 使用 Joi 验证环境变量 提供默认值和类型检查
+     * 5. 将 ConfigService 注册为全局服务
+     */
     ConfigModule.forRoot({
       isGlobal: true,
+      // 优先级从高到底，先加载系统环境变量，再加载 .env.local 再加载 .env
       envFilePath: ['.env.local', '.env'],
+      // configuration.ts 将环境变量转换为结构化配置对象
       load: [configuration],
+      // 使用 Joi 验证环境变量 提供默认值和类型检查
       validationSchema: configValidationSchema,
     }),
 

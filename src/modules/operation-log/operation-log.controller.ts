@@ -14,10 +14,7 @@ import { QueryOperationLogDto } from './dto/query-operation-log.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../auth/decorators/roles.decorator';
-import {
-  CurrentUser,
-  CurrentUserInfo,
-} from '../../auth/decorators/current-user.decorator';
+import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 
 @Controller('operation-logs')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -25,7 +22,7 @@ export class OperationLogController {
   constructor(private readonly operationLogService: OperationLogService) {}
 
   /**
-   * 获取操作日志列表（管理员和经理可查看）
+   * 获取操作日志列表（admin和manager可查看）
    */
   @Get()
   @Roles('admin', 'manager')

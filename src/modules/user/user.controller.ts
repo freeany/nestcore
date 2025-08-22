@@ -25,14 +25,18 @@ import {
 } from '../../auth/decorators/current-user.decorator';
 
 @Controller('users')
+// app.module中provide的守卫(服务)
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class UserController {
+  // user.module中provide的UserService, 在构造器中注入
   constructor(private readonly userService: UserService) {}
 
   /**
    * 创建用户（仅管理员）
    */
   @Post()
+  // RolesGuard会检查当前方法是否有@Roles装饰器, 并检查@Roles中参数是否包含当前用户的角色
+  // 这里的'admin'表示只有管理员角色才能访问这个接口
   @Roles('admin')
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createUserDto: CreateUserDto) {
@@ -48,6 +52,21 @@ export class UserController {
    */
   @Get()
   @Roles('admin', 'manager')
+  /**
+   * 如果想局部校验
+   * import { ValidationPipe } from '@nestjs/common';
+    @UsePipes(new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+    }))
+    async findAll(@Query() queryDto: QueryUserDto) {
+      // ...
+    }
+   */
   async findAll(@Query() queryDto: QueryUserDto) {
     const result = await this.userService.findAll(queryDto);
     return {
@@ -73,6 +92,7 @@ export class UserController {
    */
   @Get(':id/details')
   @Roles('admin', 'manager')
+  // 对id参数进行处理
   async getUserDetails(@Param('id', ParseIntPipe) id: number) {
     const details = await this.userService.getUserDetails(id);
     return {

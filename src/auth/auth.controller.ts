@@ -6,7 +6,6 @@ import {
   HttpStatus,
   Req,
   Get,
-  UseGuards,
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { AuthService } from './auth.service';
@@ -15,8 +14,6 @@ import { RegisterDto } from './dto/register.dto';
 import { Public } from './decorators/public.decorator';
 import { CurrentUser } from './decorators/current-user.decorator';
 import type { CurrentUserInfo } from './decorators/current-user.decorator';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
-
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}

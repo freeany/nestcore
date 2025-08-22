@@ -38,13 +38,13 @@ export const configValidationSchema = Joi.object({
 });
 
 export default () => ({
-  port: parseInt(process.env.PORT!, 10) || APP_DEFAULTS.PORT,
+  port: parseInt(process.env.PORT || String(APP_DEFAULTS.PORT), 10),
   nodeEnv: process.env.NODE_ENV || APP_DEFAULTS.NODE_ENV,
 
   database: {
     type: process.env.DB_TYPE || DATABASE_DEFAULTS.TYPE,
     host: process.env.DB_HOST,
-    port: parseInt(process.env.DB_PORT!, 10) || DATABASE_DEFAULTS.PORT,
+    port: parseInt(process.env.DB_PORT || String(DATABASE_DEFAULTS.PORT), 10),
     username: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_DATABASE,

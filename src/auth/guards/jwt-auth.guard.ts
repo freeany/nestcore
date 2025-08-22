@@ -7,14 +7,6 @@ import { AuthGuard } from '@nestjs/passport';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
-interface AuthenticatedUser {
-  id: number;
-  username: string;
-  email: string;
-  roles: string[];
-  isActive: boolean;
-}
-
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
   constructor(private reflector: Reflector) {
@@ -35,8 +27,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   }
 
   handleRequest<TUser = any>(err: any, user: any): TUser {
-    console.log(err, 'err');
-
     if (err || !user) {
       throw err || new UnauthorizedException('访问令牌无效或已过期');
     }

@@ -130,6 +130,7 @@ export class OperationLogService {
     const queryBuilder = this.operationLogRepository.createQueryBuilder('log');
 
     if (startDate && endDate) {
+      // 使用命名参数防止SQL注入
       queryBuilder.where('log.createdAt BETWEEN :startDate AND :endDate', {
         startDate,
         endDate,
@@ -153,13 +154,16 @@ export class OperationLogService {
       .getRawOne();
 
     return {
-      total: parseInt(totalStats.total),
-      successCount: parseInt(totalStats.successCount),
-      failedCount: parseInt(totalStats.failedCount),
+      total: parseInt(String(totalStats?.total || 0)),
+      successCount: parseInt(String(totalStats?.successCount || 0)),
+      failedCount: parseInt(String(totalStats?.failedCount || 0)),
       successRate:
-        totalStats.total > 0
-          ? ((totalStats.successCount / totalStats.total) * 100).toFixed(2)
-          : 0,
+        (totalStats?.total || 0) > 0
+          ? (
+              ((totalStats?.successCount || 0) / (totalStats?.total || 0)) *
+              100
+            ).toFixed(2)
+          : '0',
       details: result.map((item) => ({
         action: item.log_action,
         module: item.log_module,
