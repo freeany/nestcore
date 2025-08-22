@@ -32,10 +32,7 @@ export class RoleController {
   @Post()
   @Roles('admin')
   @HttpCode(HttpStatus.CREATED)
-  async create(
-    @Body() createRoleDto: CreateRoleDto,
-    @CurrentUser() user: CurrentUserInfo,
-  ) {
+  async create(@Body() createRoleDto: CreateRoleDto) {
     const role = await this.roleService.create(createRoleDto);
     return {
       message: '角色创建成功',
@@ -137,7 +134,6 @@ export class RoleController {
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateRoleDto: UpdateRoleDto,
-    @CurrentUser() user: CurrentUserInfo,
   ) {
     const role = await this.roleService.update(id, updateRoleDto);
     return {
@@ -152,10 +148,7 @@ export class RoleController {
   @Delete(':id')
   @Roles('admin')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(
-    @Param('id', ParseIntPipe) id: number,
-    @CurrentUser() user: CurrentUserInfo,
-  ) {
+  async remove(@Param('id', ParseIntPipe) id: number) {
     await this.roleService.remove(id);
     return {
       message: '角色删除成功',
@@ -170,7 +163,6 @@ export class RoleController {
   async duplicate(
     @Param('id', ParseIntPipe) id: number,
     @Body('newName') newName: string,
-    @CurrentUser() user: CurrentUserInfo,
   ) {
     const role = await this.roleService.duplicate(id, newName);
     return {
@@ -185,10 +177,7 @@ export class RoleController {
   @Delete('batch')
   @Roles('admin')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async removeBatch(
-    @Body('ids') ids: number[],
-    @CurrentUser() user: CurrentUserInfo,
-  ) {
+  async removeBatch(@Body('ids') ids: number[]) {
     await this.roleService.removeBatch(ids);
     return {
       message: '批量删除角色成功',
@@ -203,7 +192,6 @@ export class RoleController {
   async batchUpdateStatus(
     @Body('ids') ids: number[],
     @Body('isActive') isActive: boolean,
-    @CurrentUser() user: CurrentUserInfo,
   ) {
     await this.roleService.batchUpdateStatus(ids, isActive);
     return {

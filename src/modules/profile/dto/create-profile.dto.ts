@@ -64,6 +64,13 @@ export class CreateProfileDto {
 
   @IsOptional()
   @IsUrl({}, { message: '请输入有效的网站URL' })
+  /**
+   * 如果想使用正则校验的话
+   * @Matches(
+        /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/,
+        { message: '请输入有效的网站URL' }
+      )
+   */
   website?: string;
 
   @IsOptional()

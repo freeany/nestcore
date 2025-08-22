@@ -16,17 +16,21 @@ import {
 import { ProfileService } from './profile.service';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../auth/decorators/roles.decorator';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { type CurrentUserInfo } from '../../auth/decorators/current-user.decorator';
 
 @Controller('profiles')
-@UseGuards(JwtAuthGuard, RolesGuard)
+// 全局守卫中已经有了
+// @UseGuards(JwtAuthGuard, RolesGuard)
+/**
+ * 什么情况下需要在controller方法中使用@UseGuard
+ * 1. 特定守卫: 需要使用全局守卫之外的特殊守卫
+ * 2. 覆盖全局守卫 : 需要替换或禁用某些全局守卫
+ * 3. 额外守卫: 在全局守卫基础上添加额外的守卫逻辑
+ */
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
-
   /**
    * 创建或更新当前用户资料
    */
@@ -140,7 +144,7 @@ export class ProfileController {
   ) {
     const profile = await this.profileService.findOne(id);
 
-    // 检查权限：只有管理员、经理或资料所有者可以查看
+    // 检查权限：只有管理员、经理或本人可以查看
     if (
       !user.roles.some((role) => ['admin', 'manager'].includes(role)) &&
       profile.user.id !== user.id
@@ -177,7 +181,6 @@ export class ProfileController {
   async updateUserProfile(
     @Param('userId', ParseIntPipe) userId: number,
     @Body() updateProfileDto: UpdateProfileDto,
-    @CurrentUser() user: CurrentUserInfo,
   ) {
     const profile = await this.profileService.update(userId, updateProfileDto);
     return {
@@ -204,10 +207,7 @@ export class ProfileController {
   @Delete('user/:userId')
   @Roles('admin')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async removeUserProfile(
-    @Param('userId', ParseIntPipe) userId: number,
-    @CurrentUser() user: CurrentUserInfo,
-  ) {
+  async removeUserProfile(@Param('userId', ParseIntPipe) userId: number) {
     await this.profileService.remove(userId);
     return {
       message: '用户资料删除成功',
@@ -221,7 +221,6 @@ export class ProfileController {
   @Roles('admin')
   async batchUpdateAvatars(
     @Body('updates') updates: { userId: number; avatar: string }[],
-    @CurrentUser() user: CurrentUserInfo,
   ) {
     const results = await this.profileService.batchUpdateAvatars(updates);
     return {

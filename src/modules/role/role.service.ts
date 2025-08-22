@@ -5,7 +5,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like, In } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { Role, User } from '../../entities';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
@@ -111,6 +111,9 @@ export class RoleService {
 
     const userCount = await this.userRepository
       .createQueryBuilder('user')
+      // 如果使用Left join,那么会包含所有用户，即使没有角色的用户也会被包含。
+      // 但由于 WHERE 条件 role.id = :roleId ，没有角色的用户会被过滤掉 结果相同，但查询效率较低
+      // 而使用inner join,只统计 拥有指定角色 的用户， 不需要统计没有任何角色的用户
       .innerJoin('user.roles', 'role')
       .where('role.id = :roleId', { roleId: id })
       .getCount();
