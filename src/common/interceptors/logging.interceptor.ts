@@ -24,7 +24,7 @@ export class LoggingInterceptor implements NestInterceptor {
     const startTime = Date.now();
 
     // 记录请求开始
-    this.winstonLogger.info('HTTP Request Started', {
+    this.winstonLogger.info(`${url}-${method}-HTTP Request Started`, {
       context: 'LoggingInterceptor',
       method,
       url,
@@ -40,7 +40,7 @@ export class LoggingInterceptor implements NestInterceptor {
           const { statusCode } = response;
 
           // 记录成功响应
-          this.winstonLogger.info('HTTP Request Completed', {
+          this.winstonLogger.info(`${url}-${method}-HTTP Request Completed`, {
             context: 'LoggingInterceptor',
             method,
             url,
@@ -56,7 +56,7 @@ export class LoggingInterceptor implements NestInterceptor {
           const statusCode = error.status || 500;
 
           // 记录错误响应
-          this.winstonLogger.error('HTTP Request Failed', {
+          this.winstonLogger.error(`${url}-${method}-HTTP Request Failed`, {
             context: 'LoggingInterceptor',
             method,
             url,
