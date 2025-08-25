@@ -3,15 +3,18 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-  Logger,
+  Inject,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { Request, Response } from 'express';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
-  private readonly logger = new Logger(LoggingInterceptor.name);
+  constructor(
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly winstonLogger: any,
+  ) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest<Request>();
@@ -21,13 +24,12 @@ export class LoggingInterceptor implements NestInterceptor {
     const startTime = Date.now();
 
     // 记录请求开始
-    this.logger.log({
-      message: 'HTTP Request Started',
+    this.winstonLogger.info('HTTP Request Started', {
+      context: 'LoggingInterceptor',
       method,
       url,
       ip,
       userAgent,
-      timestamp: new Date().toISOString(),
     });
 
     return next.handle().pipe(
@@ -38,15 +40,14 @@ export class LoggingInterceptor implements NestInterceptor {
           const { statusCode } = response;
 
           // 记录成功响应
-          this.logger.log({
-            message: 'HTTP Request Completed',
+          this.winstonLogger.info('HTTP Request Completed', {
+            context: 'LoggingInterceptor',
             method,
             url,
             statusCode,
             duration: `${duration}ms`,
             ip,
             userAgent,
-            timestamp: new Date().toISOString(),
           });
         },
         error: (error) => {
@@ -55,8 +56,8 @@ export class LoggingInterceptor implements NestInterceptor {
           const statusCode = error.status || 500;
 
           // 记录错误响应
-          this.logger.error({
-            message: 'HTTP Request Failed',
+          this.winstonLogger.error('HTTP Request Failed', {
+            context: 'LoggingInterceptor',
             method,
             url,
             statusCode,
@@ -65,7 +66,6 @@ export class LoggingInterceptor implements NestInterceptor {
             stack: error.stack,
             ip,
             userAgent,
-            timestamp: new Date().toISOString(),
           });
         },
       }),

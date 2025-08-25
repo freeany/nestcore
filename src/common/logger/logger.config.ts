@@ -4,7 +4,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 // 确保日志目录存在
-const logDir = process.env.LOG_DIR || 'logs';
+const logDir = process.env.LOG_DIR || path.join(process.cwd(), 'logs');
 if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir, { recursive: true });
 }

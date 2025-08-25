@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -19,6 +20,10 @@ async function bootstrap() {
       },
     }),
   );
+
+  // 全局日志拦截器
+  // 会自动拦截http请求
+  app.useGlobalInterceptors(app.get(LoggingInterceptor));
 
   // CORS配置
   app.enableCors({

@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { WinstonModule } from 'nest-winston';
 
 // 配置常量
 import {
@@ -25,6 +26,12 @@ import { OperationLogModule } from './modules/operation-log/operation-log.module
 // 守卫
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
+
+// 日志配置
+import { winstonConfig } from './common/logger/logger.config';
+
+// 拦截器
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
 @Module({
   imports: [
@@ -54,6 +61,9 @@ import { RolesGuard } from './auth/guards/roles.guard';
         limit: THROTTLE_DEFAULTS.LIMIT,
       },
     ]),
+
+    // Winston 日志模块
+    WinstonModule.forRoot(winstonConfig),
 
     // 数据库模块
     TypeOrmModule.forRootAsync({
@@ -92,6 +102,8 @@ import { RolesGuard } from './auth/guards/roles.guard';
     OperationLogModule,
   ],
   providers: [
+    // 拦截器
+    LoggingInterceptor,
     // 全局守卫
     {
       provide: APP_GUARD,
