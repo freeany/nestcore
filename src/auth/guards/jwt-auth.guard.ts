@@ -26,7 +26,15 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     return super.canActivate(context);
   }
 
+  /**
+   * 处理验证结果
+   * @param err 错误信息
+   * @param user 验证通过的用户信息
+   * @returns 验证通过的用户信息
+   */
   handleRequest<TUser = any>(err: any, user: any): TUser {
+    console.log(err, user, '???');
+
     if (err || !user) {
       throw err || new UnauthorizedException('访问令牌无效或已过期');
     }

@@ -16,7 +16,7 @@ export interface JwtPayload {
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
-    private configService: ConfigService,
+    protected configService: ConfigService,
     private userService: UserService,
   ) {
     super({

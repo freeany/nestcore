@@ -9,11 +9,13 @@ import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { Request, Response } from 'express';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { Logger } from 'winston';
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
   constructor(
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly winstonLogger: any,
+    // logger.config.ts 中的winstonLogger实例
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly winstonLogger: Logger,
   ) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {

@@ -121,6 +121,7 @@ export class AuthService {
       }
 
       // 加密密码
+      // bcrypt 自动生成随机盐值，防止彩虹表攻击
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(password, saltRounds);
 

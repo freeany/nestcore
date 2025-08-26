@@ -18,6 +18,8 @@ export const CurrentUser = createParamDecorator(
     ctx: ExecutionContext,
   ): CurrentUserInfo | CurrentUserInfo[keyof CurrentUserInfo] => {
     const request = ctx.switchToHttp().getRequest<RequestWithUser>();
+
+    // 重要：这里的user是jwt.strategy.ts中validate方法返回的，passprotModule在req对象上添加的用户信息
     const user = request.user;
     return data ? user[data] : user;
   },

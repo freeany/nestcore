@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_FILTER } from '@nestjs/core';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { WinstonModule } from 'nest-winston';
 
@@ -32,6 +32,9 @@ import { winstonConfig } from './common/logger/logger.config';
 
 // 拦截器
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+
+// 异常过滤器
+import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 
 @Module({
   imports: [
@@ -104,6 +107,11 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
   providers: [
     // 拦截器
     LoggingInterceptor,
+    // 全局异常过滤器
+    {
+      provide: APP_FILTER,
+      useClass: GlobalExceptionFilter,
+    },
     // 全局守卫
     {
       provide: APP_GUARD,

@@ -25,8 +25,8 @@ import {
 } from '../../auth/decorators/current-user.decorator';
 
 @Controller('users')
-// app.module中provide的守卫(服务)
-@UseGuards(JwtAuthGuard, RolesGuard)
+// app.module中provide的守卫(服务), 全局已经加上了，这里不需要写了
+// @UseGuards(JwtAuthGuard, RolesGuard)
 export class UserController {
   // user.module中provide的UserService, 在构造器中注入
   constructor(private readonly userService: UserService) {}
