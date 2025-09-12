@@ -51,7 +51,7 @@ export class AuthController {
   getProfile(@CurrentUser() user: CurrentUserInfo) {
     return {
       message: '获取用户信息成功',
-      user,
+      data: user,
     };
   }
 

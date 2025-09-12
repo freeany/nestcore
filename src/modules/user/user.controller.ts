@@ -179,6 +179,19 @@ export class UserController {
   }
 
   /**
+   * 获取用户统计信息
+   */
+  @Get('statistics')
+  @Roles('admin')
+  async getUsersStatistics() {
+    const statistics = await this.userService.getUsersStatistics();
+    return {
+      message: '获取用户统计信息成功',
+      data: statistics,
+    };
+  }
+
+  /**
    * 根据ID获取用户信息
    */
   @Get(':id')

@@ -277,6 +277,11 @@ export class UserService {
 
   /**
    * 获取用户统计信息（多表联查示例5）
+   * - 角色数量 ( roleCount ) - 该用户拥有的角色总数
+   * - 操作日志总数 ( totalLogs ) - 该用户的所有操作记录数量
+   * - 登录次数 ( loginCount ) - 该用户的登录操作次数
+   * - 失败操作数 ( failedOperations ) - 该用户执行失败的操作数量
+   * - 最后活动时间 ( lastActivity ) - 该用户最近一次操作的时间
    */
   async getUserStatistics(userId: number) {
     const user = await this.userRepository.findOne({
@@ -488,5 +493,47 @@ export class UserService {
       `,
       [startDate, endDate],
     );
+  }
+
+  /**
+   * 获取用户统计信息
+   * totalUsers - 总用户数
+   * newUsersCount - 新增用户数 最近三天内注册的用户数量
+   * activeUsersCount - 活跃用户数 最近7天有登录记录的用户数量
+   * inactiveUsersCount - 禁用用户数 已被禁用的用户数量
+   */
+  async getUsersStatistics() {
+    // 获取总用户数
+    const totalUsers = await this.userRepository.count();
+
+    // 获取最近三天新增用户数量
+    const threeDaysAgo = new Date();
+    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+
+    const newUsersCount = await this.userRepository
+      .createQueryBuilder('user')
+      .where('user.createdAt >= :threeDaysAgo', { threeDaysAgo })
+      .getCount();
+
+    // 获取活跃用户数（最近7天有登录记录的用户）
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const activeUsersCount = await this.userRepository
+      .createQueryBuilder('user')
+      .where('user.lastLoginAt >= :sevenDaysAgo', { sevenDaysAgo })
+      .getCount();
+
+    // 获取禁用用户数
+    const inactiveUsersCount = await this.userRepository.count({
+      where: { isActive: false },
+    });
+
+    return {
+      totalUsers,
+      newUsersCount,
+      activeUsersCount,
+      inactiveUsersCount,
+    };
   }
 }
