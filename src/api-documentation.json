@@ -1,0 +1,898 @@
+{
+  "title": "NestCore 用户管理系统 API 文档",
+  "version": "1.0.0",
+  "description": "基于 NestJS 构建的完整用户管理系统，包含用户CRUD、角色管理、权限控制、操作日志等功能",
+  "baseUrl": "http://localhost:3000/api/v1",
+  "authentication": {
+    "type": "Bearer Token (JWT)",
+    "header": "Authorization: Bearer <token>",
+    "note": "除了标记为 public 的接口外，其他接口都需要JWT认证"
+  },
+  "roles": {
+    "admin": "系统管理员，拥有所有权限",
+    "manager": "管理员，可以管理用户和查看日志",
+    "user": "普通用户，只能管理自己的信息"
+  },
+  "apis": {
+    "认证模块 (Auth)": {
+      "baseRoute": "/auth",
+      "endpoints": [
+        {
+          "method": "POST",
+          "path": "/auth/login",
+          "summary": "用户登录",
+          "public": true,
+          "requestBody": {
+            "username": "string (required) - 用户名",
+            "password": "string (required, min: 6) - 密码"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "access_token": "string - JWT访问令牌",
+            "user": {
+              "id": "number - 用户ID",
+              "username": "string - 用户名",
+              "email": "string - 邮箱",
+              "roles": "string[] - 用户角色列表",
+              "isActive": "boolean - 是否激活"
+            }
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/auth/register",
+          "summary": "用户注册",
+          "public": true,
+          "requestBody": {
+            "username": "string (required) - 用户名",
+            "email": "string (required) - 邮箱",
+            "password": "string (required, min: 6) - 密码"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "user": {
+              "id": "number - 用户ID",
+              "username": "string - 用户名",
+              "email": "string - 邮箱"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/auth/profile",
+          "summary": "获取当前用户信息",
+          "roles": ["user", "manager", "admin"],
+          "response": {
+            "message": "string - 响应消息",
+            "data": "CurrentUserInfo - 当前用户信息"
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/auth/refresh",
+          "summary": "刷新令牌",
+          "roles": ["user", "manager", "admin"],
+          "response": {
+            "message": "string - 响应消息",
+            "access_token": "string - 新的JWT访问令牌"
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/auth/logout",
+          "summary": "用户登出",
+          "roles": ["user", "manager", "admin"],
+          "response": {
+            "message": "string - 响应消息"
+          }
+        }
+      ]
+    },
+    "用户管理模块 (Users)": {
+      "baseRoute": "/users",
+      "endpoints": [
+        {
+          "method": "POST",
+          "path": "/users",
+          "summary": "创建用户",
+          "roles": ["admin"],
+          "requestBody": {
+            "username": "string (required) - 用户名",
+            "email": "string (required) - 邮箱",
+            "password": "string (required, min: 6) - 密码",
+            "roleIds": "number[] (optional) - 角色ID列表"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "data": "User - 创建的用户信息"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/users",
+          "summary": "获取用户列表（分页查询）",
+          "roles": ["admin", "manager"],
+          "queryParams": {
+            "page": "number (optional, default: 1) - 页码",
+            "limit": "number (optional, default: 10) - 每页数量",
+            "search": "string (optional) - 搜索关键词",
+            "role": "string (optional) - 角色筛选",
+            "isActive": "boolean (optional) - 状态筛选"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "data": "User[] - 用户列表",
+            "total": "number - 总数量",
+            "page": "number - 当前页码",
+            "limit": "number - 每页数量"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/users/me",
+          "summary": "获取当前用户信息",
+          "roles": ["user", "manager", "admin"],
+          "response": {
+            "message": "string - 响应消息",
+            "data": "User - 用户详细信息"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/users/statistics",
+          "summary": "获取用户统计信息",
+          "roles": ["admin"],
+          "response": {
+            "message": "string - 响应消息",
+            "data": {
+              "totalUsers": "number - 总用户数",
+              "activeUsers": "number - 活跃用户数",
+              "newUsersThisMonth": "number - 本月新增用户数"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/users/recent-active",
+          "summary": "获取最近活跃用户",
+          "roles": ["admin", "manager"],
+          "queryParams": {
+            "days": "number (optional, default: 7) - 天数",
+            "limit": "number (optional, default: 10) - 限制数量"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "data": "User[] - 最近活跃用户列表"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/users/activity-report",
+          "summary": "获取用户活跃度报告",
+          "roles": ["admin"],
+          "queryParams": {
+            "startDate": "string (required) - 开始日期 (YYYY-MM-DD)",
+            "endDate": "string (required) - 结束日期 (YYYY-MM-DD)"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "data": "ActivityReport - 活跃度报告"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/users/by-role/:roleName",
+          "summary": "根据角色查找用户",
+          "roles": ["admin", "manager"],
+          "pathParams": {
+            "roleName": "string (required) - 角色名称"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "data": "User[] - 指定角色的用户列表"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/users/:id",
+          "summary": "根据ID获取用户信息",
+          "roles": ["admin", "manager"],
+          "pathParams": {
+            "id": "number (required) - 用户ID"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "data": "User - 用户详细信息"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/users/:id/details",
+          "summary": "获取用户详细信息（包含统计数据）",
+          "roles": ["admin", "manager"],
+          "pathParams": {
+            "id": "number (required) - 用户ID"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "data": "UserDetails - 用户详细信息和统计数据"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/users/:id/logs",
+          "summary": "获取用户操作日志",
+          "roles": ["admin", "manager"],
+          "pathParams": {
+            "id": "number (required) - 用户ID"
+          },
+          "queryParams": {
+            "page": "number (optional, default: 1) - 页码",
+            "limit": "number (optional, default: 10) - 每页数量"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "data": "OperationLog[] - 操作日志列表",
+            "total": "number - 总数量"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/users/:id/statistics",
+          "summary": "获取用户统计信息",
+          "roles": ["admin", "manager"],
+          "pathParams": {
+            "id": "number (required) - 用户ID"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "data": "UserStatistics - 用户统计信息"
+          }
+        },
+        {
+          "method": "PATCH",
+          "path": "/users/:id",
+          "summary": "更新用户信息",
+          "roles": ["admin", "user (仅限本人)"],
+          "pathParams": {
+            "id": "number (required) - 用户ID"
+          },
+          "requestBody": {
+            "username": "string (optional) - 用户名",
+            "email": "string (optional) - 邮箱",
+            "isActive": "boolean (optional) - 是否激活"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "data": "User - 更新后的用户信息"
+          }
+        },
+        {
+          "method": "DELETE",
+          "path": "/users/:id",
+          "summary": "删除用户",
+          "roles": ["admin"],
+          "pathParams": {
+            "id": "number (required) - 用户ID"
+          },
+          "response": {
+            "message": "string - 响应消息"
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/users/:id/roles",
+          "summary": "为用户分配角色",
+          "roles": ["admin"],
+          "pathParams": {
+            "id": "number (required) - 用户ID"
+          },
+          "requestBody": {
+            "roleIds": "number[] (required) - 角色ID列表"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "data": "User - 更新后的用户信息"
+          }
+        },
+        {
+          "method": "DELETE",
+          "path": "/users/:id/roles",
+          "summary": "移除用户角色",
+          "roles": ["admin"],
+          "pathParams": {
+            "id": "number (required) - 用户ID"
+          },
+          "requestBody": {
+            "roleIds": "number[] (required) - 要移除的角色ID列表"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "data": "User - 更新后的用户信息"
+          }
+        },
+        {
+          "method": "PATCH",
+          "path": "/users/batch/status",
+          "summary": "批量更新用户状态",
+          "roles": ["admin"],
+          "requestBody": {
+            "userIds": "number[] (required) - 用户ID列表",
+            "isActive": "boolean (required) - 激活状态"
+          },
+          "response": {
+            "message": "string - 响应消息"
+          }
+        }
+      ]
+    },
+    "角色管理模块 (Roles)": {
+      "baseRoute": "/roles",
+      "endpoints": [
+        {
+          "method": "POST",
+          "path": "/roles",
+          "summary": "创建角色",
+          "roles": ["admin"],
+          "requestBody": {
+            "name": "string (required) - 角色名称",
+            "description": "string (optional) - 角色描述",
+            "permissions": "string[] (optional) - 权限列表"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "data": "Role - 创建的角色信息"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/roles",
+          "summary": "获取角色列表",
+          "roles": ["admin", "manager"],
+          "queryParams": {
+            "page": "number (optional, default: 1) - 页码",
+            "limit": "number (optional, default: 10) - 每页数量",
+            "search": "string (optional) - 搜索关键词"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "data": "Role[] - 角色列表",
+            "total": "number - 总数量"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/roles/active",
+          "summary": "获取活跃角色列表（用于下拉选择）",
+          "roles": ["admin", "manager"],
+          "response": {
+            "message": "string - 响应消息",
+            "data": "Role[] - 活跃角色列表"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/roles/permission-usage",
+          "summary": "获取角色权限使用情况",
+          "roles": ["admin"],
+          "response": {
+            "message": "string - 响应消息",
+            "data": "PermissionUsage - 权限使用情况统计"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/roles/hierarchy",
+          "summary": "获取角色层次结构",
+          "roles": ["admin"],
+          "response": {
+            "message": "string - 响应消息",
+            "data": "RoleHierarchy - 角色层次结构"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/roles/:id",
+          "summary": "根据ID获取角色信息",
+          "roles": ["admin", "manager"],
+          "pathParams": {
+            "id": "number (required) - 角色ID"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "data": "Role - 角色详细信息"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/roles/:id/statistics",
+          "summary": "获取角色统计信息",
+          "roles": ["admin", "manager"],
+          "pathParams": {
+            "id": "number (required) - 角色ID"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "data": "RoleStatistics - 角色统计信息"
+          }
+        },
+        {
+          "method": "PATCH",
+          "path": "/roles/:id",
+          "summary": "更新角色信息",
+          "roles": ["admin"],
+          "pathParams": {
+            "id": "number (required) - 角色ID"
+          },
+          "requestBody": {
+            "name": "string (optional) - 角色名称",
+            "description": "string (optional) - 角色描述",
+            "permissions": "string[] (optional) - 权限列表",
+            "isActive": "boolean (optional) - 是否激活"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "data": "Role - 更新后的角色信息"
+          }
+        },
+        {
+          "method": "DELETE",
+          "path": "/roles/:id",
+          "summary": "删除角色",
+          "roles": ["admin"],
+          "pathParams": {
+            "id": "number (required) - 角色ID"
+          },
+          "response": {
+            "message": "string - 响应消息"
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/roles/:id/duplicate",
+          "summary": "复制角色",
+          "roles": ["admin"],
+          "pathParams": {
+            "id": "number (required) - 要复制的角色ID"
+          },
+          "requestBody": {
+            "newName": "string (required) - 新角色名称"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "data": "Role - 复制的角色信息"
+          }
+        },
+        {
+          "method": "DELETE",
+          "path": "/roles/batch",
+          "summary": "批量删除角色",
+          "roles": ["admin"],
+          "requestBody": {
+            "ids": "number[] (required) - 要删除的角色ID列表"
+          },
+          "response": {
+            "message": "string - 响应消息"
+          }
+        },
+        {
+          "method": "PATCH",
+          "path": "/roles/batch/status",
+          "summary": "批量更新角色状态",
+          "roles": ["admin"],
+          "requestBody": {
+            "ids": "number[] (required) - 角色ID列表",
+            "isActive": "boolean (required) - 激活状态"
+          },
+          "response": {
+            "message": "string - 响应消息"
+          }
+        }
+      ]
+    },
+    "用户资料模块 (Profiles)": {
+      "baseRoute": "/profiles",
+      "endpoints": [
+        {
+          "method": "POST",
+          "path": "/profiles",
+          "summary": "创建或更新当前用户资料",
+          "roles": ["user", "manager", "admin"],
+          "requestBody": {
+            "firstName": "string (optional) - 名",
+            "lastName": "string (optional) - 姓",
+            "phone": "string (optional) - 电话号码",
+            "avatar": "string (optional) - 头像URL",
+            "bio": "string (optional) - 个人简介",
+            "birthday": "string (optional) - 生日 (YYYY-MM-DD)",
+            "address": "string (optional) - 地址"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "data": "Profile - 用户资料信息"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/profiles/me",
+          "summary": "获取当前用户资料",
+          "roles": ["user", "manager", "admin"],
+          "response": {
+            "message": "string - 响应消息",
+            "data": "Profile - 当前用户资料"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/profiles/statistics",
+          "summary": "获取资料统计信息",
+          "roles": ["admin", "manager"],
+          "response": {
+            "message": "string - 响应消息",
+            "data": "ProfileStatistics - 资料统计信息"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/profiles/search",
+          "summary": "搜索用户资料",
+          "roles": ["admin", "manager"],
+          "queryParams": {
+            "keyword": "string (required) - 搜索关键词",
+            "page": "number (optional, default: 1) - 页码",
+            "limit": "number (optional, default: 10) - 每页数量"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "data": "Profile[] - 搜索结果",
+            "total": "number - 总数量"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/profiles/recent",
+          "summary": "获取最近更新的资料",
+          "roles": ["admin", "manager"],
+          "queryParams": {
+            "limit": "number (optional, default: 10) - 限制数量"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "data": "Profile[] - 最近更新的资料列表"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/profiles/birthday-reminders",
+          "summary": "获取生日提醒",
+          "roles": ["admin", "manager"],
+          "response": {
+            "message": "string - 响应消息",
+            "data": "BirthdayReminder[] - 生日提醒列表"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/profiles/user/:userId",
+          "summary": "根据用户ID获取资料",
+          "roles": ["admin", "manager"],
+          "pathParams": {
+            "userId": "number (required) - 用户ID"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "data": "Profile - 用户资料"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/profiles/:id",
+          "summary": "根据资料ID获取详情",
+          "roles": ["admin", "manager", "user (仅限本人)"],
+          "pathParams": {
+            "id": "number (required) - 资料ID"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "data": "Profile - 资料详情"
+          }
+        },
+        {
+          "method": "PATCH",
+          "path": "/profiles/me",
+          "summary": "更新当前用户资料",
+          "roles": ["user", "manager", "admin"],
+          "requestBody": {
+            "firstName": "string (optional) - 名",
+            "lastName": "string (optional) - 姓",
+            "phone": "string (optional) - 电话号码",
+            "avatar": "string (optional) - 头像URL",
+            "bio": "string (optional) - 个人简介",
+            "birthday": "string (optional) - 生日 (YYYY-MM-DD)",
+            "address": "string (optional) - 地址"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "data": "Profile - 更新后的用户资料"
+          }
+        },
+        {
+          "method": "PATCH",
+          "path": "/profiles/user/:userId",
+          "summary": "更新指定用户资料",
+          "roles": ["admin"],
+          "pathParams": {
+            "userId": "number (required) - 用户ID"
+          },
+          "requestBody": {
+            "firstName": "string (optional) - 名",
+            "lastName": "string (optional) - 姓",
+            "phone": "string (optional) - 电话号码",
+            "avatar": "string (optional) - 头像URL",
+            "bio": "string (optional) - 个人简介",
+            "birthday": "string (optional) - 生日 (YYYY-MM-DD)",
+            "address": "string (optional) - 地址"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "data": "Profile - 更新后的用户资料"
+          }
+        },
+        {
+          "method": "DELETE",
+          "path": "/profiles/me",
+          "summary": "删除当前用户资料",
+          "roles": ["user", "manager", "admin"],
+          "response": {
+            "message": "string - 响应消息"
+          }
+        },
+        {
+          "method": "DELETE",
+          "path": "/profiles/user/:userId",
+          "summary": "删除指定用户资料",
+          "roles": ["admin"],
+          "pathParams": {
+            "userId": "number (required) - 用户ID"
+          },
+          "response": {
+            "message": "string - 响应消息"
+          }
+        },
+        {
+          "method": "PATCH",
+          "path": "/profiles/batch/avatars",
+          "summary": "批量更新头像",
+          "roles": ["admin"],
+          "requestBody": {
+            "updates": "Array<{userId: number, avatar: string}> (required) - 更新列表"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "data": "BatchUpdateResult - 批量更新结果"
+          }
+        }
+      ]
+    },
+    "操作日志模块 (Operation Logs)": {
+      "baseRoute": "/operation-logs",
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/operation-logs",
+          "summary": "获取操作日志列表",
+          "roles": ["admin", "manager"],
+          "queryParams": {
+            "page": "number (optional, default: 1) - 页码",
+            "limit": "number (optional, default: 10) - 每页数量",
+            "userId": "number (optional) - 用户ID筛选",
+            "action": "string (optional) - 操作类型筛选",
+            "startDate": "string (optional) - 开始日期",
+            "endDate": "string (optional) - 结束日期"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "data": "OperationLog[] - 操作日志列表",
+            "total": "number - 总数量"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/operation-logs/my-logs",
+          "summary": "获取当前用户的操作日志",
+          "roles": ["user", "manager", "admin"],
+          "queryParams": {
+            "page": "number (optional, default: 1) - 页码",
+            "limit": "number (optional, default: 10) - 每页数量",
+            "action": "string (optional) - 操作类型筛选",
+            "startDate": "string (optional) - 开始日期",
+            "endDate": "string (optional) - 结束日期"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "data": "OperationLog[] - 个人操作日志列表",
+            "total": "number - 总数量"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/operation-logs/statistics",
+          "summary": "获取操作统计信息",
+          "roles": ["admin", "manager"],
+          "queryParams": {
+            "startDate": "string (optional) - 开始日期",
+            "endDate": "string (optional) - 结束日期"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "data": "OperationStatistics - 操作统计信息"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/operation-logs/user-stats/:userId",
+          "summary": "获取用户操作统计",
+          "roles": ["admin", "manager"],
+          "pathParams": {
+            "userId": "number (required) - 用户ID"
+          },
+          "queryParams": {
+            "days": "number (optional, default: 30) - 统计天数"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "data": "UserOperationStats - 用户操作统计"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/operation-logs/my-stats",
+          "summary": "获取当前用户操作统计",
+          "roles": ["user", "manager", "admin"],
+          "queryParams": {
+            "days": "number (optional, default: 30) - 统计天数"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "data": "UserOperationStats - 个人操作统计"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/operation-logs/trend",
+          "summary": "获取系统操作趋势",
+          "roles": ["admin", "manager"],
+          "queryParams": {
+            "days": "number (optional, default: 7) - 统计天数"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "data": "OperationTrend - 系统操作趋势"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/operation-logs/popular",
+          "summary": "获取热门操作",
+          "roles": ["admin", "manager"],
+          "queryParams": {
+            "limit": "number (optional, default: 10) - 限制数量",
+            "days": "number (optional, default: 30) - 统计天数"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "data": "PopularOperation[] - 热门操作列表"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/operation-logs/:id",
+          "summary": "根据ID获取操作日志详情",
+          "roles": ["admin", "manager"],
+          "pathParams": {
+            "id": "number (required) - 日志ID"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "data": "OperationLog - 操作日志详情"
+          }
+        },
+        {
+          "method": "DELETE",
+          "path": "/operation-logs/cleanup",
+          "summary": "清理过期日志",
+          "roles": ["admin"],
+          "queryParams": {
+            "days": "number (optional, default: 90) - 保留天数"
+          },
+          "response": {
+            "message": "string - 响应消息",
+            "data": {
+              "deletedCount": "number - 删除的日志数量",
+              "daysKept": "number - 保留的天数"
+            }
+          }
+        }
+      ]
+    },
+    "应用根模块 (App)": {
+      "baseRoute": "/",
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/",
+          "summary": "应用根路径",
+          "public": true,
+          "response": {
+            "message": "string - Hello World!"
+          }
+        }
+      ]
+    }
+  },
+  "dataModels": {
+    "User": {
+      "id": "number - 用户ID",
+      "username": "string - 用户名",
+      "email": "string - 邮箱",
+      "isActive": "boolean - 是否激活",
+      "roles": "Role[] - 用户角色列表",
+      "profile": "Profile - 用户资料",
+      "createdAt": "Date - 创建时间",
+      "updatedAt": "Date - 更新时间"
+    },
+    "Role": {
+      "id": "number - 角色ID",
+      "name": "string - 角色名称",
+      "description": "string - 角色描述",
+      "permissions": "string[] - 权限列表",
+      "isActive": "boolean - 是否激活",
+      "users": "User[] - 拥有此角色的用户",
+      "createdAt": "Date - 创建时间",
+      "updatedAt": "Date - 更新时间"
+    },
+    "Profile": {
+      "id": "number - 资料ID",
+      "firstName": "string - 名",
+      "lastName": "string - 姓",
+      "phone": "string - 电话号码",
+      "avatar": "string - 头像URL",
+      "bio": "string - 个人简介",
+      "birthday": "Date - 生日",
+      "address": "string - 地址",
+      "user": "User - 关联用户",
+      "createdAt": "Date - 创建时间",
+      "updatedAt": "Date - 更新时间"
+    },
+    "OperationLog": {
+      "id": "number - 日志ID",
+      "userId": "number - 用户ID",
+      "action": "string - 操作类型",
+      "resource": "string - 操作资源",
+      "resourceId": "string - 资源ID",
+      "details": "object - 操作详情",
+      "ip": "string - IP地址",
+      "userAgent": "string - 用户代理",
+      "user": "User - 关联用户",
+      "createdAt": "Date - 创建时间"
+    }
+  },
+  "errorCodes": {
+    "400": "Bad Request - 请求参数错误",
+    "401": "Unauthorized - 未授权，需要登录",
+    "403": "Forbidden - 禁止访问，权限不足",
+    "404": "Not Found - 资源不存在",
+    "409": "Conflict - 资源冲突（如用户名已存在）",
+    "422": "Unprocessable Entity - 请求格式正确但语义错误",
+    "500": "Internal Server Error - 服务器内部错误"
+  },
+  "usageNotes": {
+    "authentication": "除了标记为 public 的接口外，所有接口都需要在请求头中包含 JWT 令牌：Authorization: Bearer <token>",
+    "pagination": "分页查询接口支持 page（页码，从1开始）和 limit（每页数量）参数",
+    "dateFormat": "日期参数格式为 YYYY-MM-DD，日期时间格式为 ISO 8601",
+    "roleBasedAccess": "接口访问权限基于用户角色，admin > manager > user",
+    "validation": "所有请求数据都会进行验证，不符合要求的请求会返回 400 错误",
+    "logging": "系统会自动记录用户的重要操作到操作日志中",
+    "cors": "API 支持 CORS，默认允许来自 http://localhost:3002 的请求"
+  }
+}
