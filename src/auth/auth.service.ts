@@ -3,6 +3,7 @@ import {
   UnauthorizedException,
   ConflictException,
   Logger,
+  HttpStatus,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -29,7 +30,7 @@ export class AuthService {
    * 用户登录
    */
   async login(loginDto: LoginDto, ip?: string, userAgent?: string) {
-    const { username, password } = loginDto;
+    const { username, password, autoLogin, type } = loginDto;
     try {
       // 查找用户（包含角色信息）
       const user = await this.userService.findByUsernameWithRoles(username);
@@ -62,10 +63,11 @@ export class AuthService {
       const accessToken = this.jwtService.sign(payload);
 
       // 记录登录日志
+      const loginTypeDesc = type ? `(${type}登录)` : '';
       await this.operationLogService.create({
         action: 'LOGIN',
         module: 'AUTH',
-        description: `用户 ${username} 登录成功`,
+        description: `用户 ${username} 登录成功${loginTypeDesc}`,
         userId: user.id,
         ipAddress: ip,
         userAgent,
@@ -75,6 +77,8 @@ export class AuthService {
       this.logger.log(`用户 ${username} 登录成功`);
 
       return {
+        code: HttpStatus.OK,
+        message: '登录成功',
         accessToken,
         user: {
           id: user.id,
@@ -83,13 +87,16 @@ export class AuthService {
           roles: user.roles?.map((role) => role.name) || [],
           isActive: user.isActive,
         },
+        autoLogin,
+        type,
       };
     } catch (error: any) {
       // 记录登录失败日志
+      const loginTypeDesc = type ? `(${type}登录)` : '';
       await this.operationLogService.create({
         action: 'LOGIN',
         module: 'AUTH',
-        description: `用户 ${username} 登录失败`,
+        description: `用户 ${username} 登录失败${loginTypeDesc}`,
         ipAddress: ip,
         userAgent,
         status: 'FAILED',

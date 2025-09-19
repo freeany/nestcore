@@ -23,7 +23,7 @@ export class AuthController {
    */
   @Public()
   @Post('login')
-  @HttpCode(HttpStatus.OK)
+  @HttpCode(HttpStatus.OK) // 浏览器返回的status code
   async login(@Body() loginDto: LoginDto, @Req() req: Request) {
     const ip = req.ip || req.connection.remoteAddress;
     const userAgent = req.get('User-Agent');

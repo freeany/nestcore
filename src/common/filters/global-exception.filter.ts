@@ -76,7 +76,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     // 构建错误响应
     const errorResponse = {
-      statusCode: status,
+      code: status,
       timestamp: new Date().toISOString(),
       path: request.url,
       method: request.method,
@@ -88,7 +88,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     // 记录错误日志
     const logContext = {
       context: 'GlobalExceptionFilter',
-      statusCode: status,
+      code: status,
       method: request.method,
       url: request.url,
       ip: request.ip,
